@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 SUPPORTED_EXTENSIONS = {
-  ".py", ".js", ".ts",".jsx", ".tsx", ".java",".cpp",".c",".h", ".cs",".go",".rb",".php",".html","..css", ".sql", ".sh", ".yaml", ".yml", ".json", ".md", ".txt"
+  ".py", ".js", ".ts",".jsx", ".tsx", ".java",".cpp",".c",".h", ".cs",".go",".rb",".php",".html",".css", ".sql", ".sh", ".yaml", ".yml", ".json", ".md", ".txt"
 }
 
 IGNORED_DIRS = {

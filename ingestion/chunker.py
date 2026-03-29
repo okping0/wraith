@@ -1,7 +1,9 @@
+import ast
 from pathlib import Path
 
 CHUNK_SIZE = 40
 CHUNK_OVERLAP = 10
+
 
 def chunk_file(file_info: dict, content: str) -> list[dict]:
   lines = content.splitlines()
@@ -26,7 +28,9 @@ def chunk_file(file_info: dict, content: str) -> list[dict]:
           "extension": file_info["extension"],
           "start_line": start+1,
           "end_line": end,
-          "total_lines": total_lines
+          "total_lines": total_lines,
+          "chunk_type": "lines",
+          "name": None,
         }
       }) 
 
