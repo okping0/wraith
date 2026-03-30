@@ -90,3 +90,21 @@ Answer:"""
               for c in relevant_chunks
           ]
       }
+  
+if __name__ == "__main__":
+    engine = QAEngine()
+    
+    questions = [
+        "how is face recognition done",
+        "how is liveness detection implemented",
+        "how is attendance marked and duplicates prevented"
+    ]
+    
+    for q in questions:
+        result = engine.ask(q)
+        print(f"\n{'='*50}")
+        print(f"Q: {result['question']}")
+        print(f"\nA: {result['answer']}")
+        print(f"\nSources:")
+        for s in result['sources']:
+            print(f"  - {s['file']} lines {s['lines']} (score: {s['score']:.3f})")
