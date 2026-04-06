@@ -69,3 +69,76 @@ Be direct and technical. No fluff."""
             "issues": "\n\n".join(all_issues) if all_issues else "No issues found"
         }
 
+    def analyze_codebase(self) -> list[dict]:
+        files = get_all_files(self.codebase_path)
+        results = []
+
+        # focus on core logic files only, skip tests and scripts
+        priority_files = [
+            f for f in files
+            if f["extension"] == ".py"
+            and "test" not in f["relative_path"].lower()
+            and "script" not in f["relative_path"].lower()
+        ]
+
+        print(f"\nAnalyzing {len(priority_files)} core files...")
+
+        for file_info in priority_files:
+            result = self.analyze_file(file_info["relative_path"])
+            results.append(result)
+
+        return results
+
+    def security_scan(self) -> list[dict]:
+        print("\nRunning security scan...")
+        dangerous_patterns = [
+            "hardcoded password or secret",
+            "SQL injection vulnerability",
+            "unsafe eval or exec",
+            "missing authentication check",
+            "exposed API key"
+        ]
+
+        findings = []
+        for pattern in dangerous_patterns:
+            results = search_codebase(pattern, n_results=2)
+            if "No relevant" not in results:
+                findings.append({
+                    "pattern": pattern,
+                    "found_in": results[:300]
+                })
+
+        return findings
+
+
+if __name__ == "__main__":
+    import sys
+    codebase = sys.argv[1] if len(sys.argv) > 1 else "."
+
+    analyzer = CodeAnalyzer(codebase_path=codebase)
+
+    print("=" * 50)
+    print("WRAITH — Bug Detection & Security Analysis")
+    print("=" * 50)
+
+    # analyze core files
+    results = analyzer.analyze_codebase()
+
+    for r in results:
+        print(f"\n{'='*50}")
+        print(f"FILE: {r['file']}")
+        print(f"{'='*50}")
+        print(r['issues'])
+
+    # security scan
+    print(f"\n{'='*50}")
+    print("SECURITY SCAN RESULTS")
+    print(f"{'='*50}")
+    findings = analyzer.security_scan()
+
+    if findings:
+        for f in findings:
+            print(f"\nPattern: {f['pattern']}")
+            print(f"Found in:\n{f['found_in']}")
+    else:
+        print("No obvious security issues detected")
