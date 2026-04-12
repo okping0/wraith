@@ -82,7 +82,10 @@ Provide:
 - The fix with corrected code snippet
 - Any other files that may need changes
 
-Be direct and technical."""
+Be direct and technical.
+Only reference code that appears EXACTLY in the context above. 
+If you cannot find the specific line, say "I could not locate the exact line 
+in the provided context." Never invent code."""
 
         response = self.client.chat.completions.create(
             model=MODEL,
@@ -147,7 +150,10 @@ Issue Description: {mock_issue_body}
 Relevant code from codebase:
 {search_results[:1500]}
 
-Be direct and technical. Reference exact file names and line numbers."""
+Be direct and technical. Reference exact file names and line numbers.
+Only reference code that appears EXACTLY in the context above. 
+If you cannot find the specific line, say "I could not locate the exact line 
+in the provided context." Never invent code."""
 
         client = Groq(api_key=os.getenv("GROQ_API_KEY"))
         response = client.chat.completions.create(
