@@ -60,6 +60,16 @@ class GitHubIssueSolver:
             n_results=3
         )
 
+        first_file = None
+        for line in search_results.split("\n"):
+            if line.startswith("File:"):
+                first_file = line.replace("File:", "").strip()
+                break
+        if first_file:
+            full_code = read_file(os.path.join(self.codebase_path, first_file))
+        else:
+            full_code = search_results
+
         prompt = f"""You are Wraith, an expert developer assistant.
 
 A GitHub issue has been reported. Your job is to:
@@ -73,8 +83,11 @@ GitHub Issue Title: {issue['title']}
 Issue Description:
 {issue['body'][:500]}
 
-Relevant code from codebase:
-{search_results[:1500]}
+Relevant code from semantic search:
+{search_results[:800]}
+
+Full file content (use this for exact line references):
+{full_code[:1200]}
 
 Provide:
 - Exact file and line number where the bug is
@@ -96,8 +109,9 @@ in the provided context." Never invent code."""
         return {
             "issue_title": issue["title"],
             "issue_body": issue["body"][:300],
-            "analysis": response.choices[0].message.content,
-            "search_results": search_results[:500]
+            "analysis": analysis_text,
+            "search_results": search_results[:500],
+            "confidence": confidence
         }
 
 
@@ -148,7 +162,7 @@ GitHub Issue Title: {mock_issue_title}
 Issue Description: {mock_issue_body}
 
 Relevant code from codebase:
-{search_results[:1500]}
+{search_results[:800]}
 
 Be direct and technical. Reference exact file names and line numbers.
 Only reference code that appears EXACTLY in the context above. 
@@ -161,6 +175,36 @@ in the provided context." Never invent code."""
             messages=[{"role": "user", "content": prompt}],
             temperature=0.1
         )
+
+        analysis_text = response.choices[0].message.content
+
+        confidence_response = client.chat.completions.create(
+            model=MODEL,
+            messages=[
+                {"role": "user", "content": prompt},
+                {"role": "assistant", "content": analysis_text},
+                {"role": "user", "content": (
+                    "Rate your confidence 0-100 that every file name, line number, "
+                    "and code snippet you referenced above exists VERBATIM in the "
+                    "context I gave you. Reply with a single integer only."
+                )}
+            ],
+            temperature=0.0  # deterministic for scoring
+        )
+
+        confidence_raw = confidence_response.choices[0].message.content.strip()
+        try:
+            confidence = int("".join(filter(str.isdigit, confidence_raw)))
+        except ValueError:
+            confidence = 0
+
+        if confidence < 80:
+            analysis_text = (
+                f"[Low confidence: {confidence}/100] "
+                "The model could not reliably locate the bug in the provided code context. "
+                "Try pointing it at a more specific file.\n\n"
+                + analysis_text
+            )
 
         print(f"\n{'='*50}")
         print("WRAITH ANALYSIS")
