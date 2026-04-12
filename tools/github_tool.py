@@ -61,12 +61,15 @@ class GitHubIssueSolver:
         )
 
         first_file = None
+        skip_extensions = [".md", ".txt", ".yaml", ".yml", ".json"]
         for line in search_results.split("\n"):
             if line.startswith("File:"):
-                first_file = line.replace("File:", "").strip()
-                break
+                candidate = line.replace("File:", "").strip()
+                if not any(candidate.endswith(ext) for ext in skip_extensions):
+                  first_file = candidate
+                  break
         if first_file:
-            full_code = read_file(os.path.join(self.codebase_path, first_file))
+            full_code = read_file(first_file, self.codebase_path)
         else:
             full_code = search_results
 
@@ -105,6 +108,8 @@ in the provided context." Never invent code."""
             messages=[{"role": "user", "content": prompt}],
             temperature=0.1
         )
+        analysis_text = response.choices[0].message.content
+        confidence = 100
 
         return {
             "issue_title": issue["title"],
@@ -148,6 +153,20 @@ the attendance flow correctly when blink_count is 0.
             f"{mock_issue_title} {mock_issue_body}",
             n_results=3
         )
+        first_file = None
+        skip_extensions = [".md", ".txt", ".yaml", ".yml", ".json"]
+        for line in search_results.split("\n"):
+            if line.startswith("File:"):
+                candidate = line.replace("File:", "").strip()
+                if not any(candidate.endswith(ext) for ext in skip_extensions):
+                  first_file = candidate
+                  break
+
+        full_code = ""
+        if first_file:
+            print(f"Reading full file: {first_file}")
+            full_code = read_file(first_file, codebase)
+            print(f"Full file content length: {len(full_code)} characters")
 
         prompt = f"""You are Wraith, an expert developer assistant.
 
@@ -163,6 +182,9 @@ Issue Description: {mock_issue_body}
 
 Relevant code from codebase:
 {search_results[:800]}
+
+Full file content (use this for exact line references):
+{full_code[:1200]}
 
 Be direct and technical. Reference exact file names and line numbers.
 Only reference code that appears EXACTLY in the context above. 
