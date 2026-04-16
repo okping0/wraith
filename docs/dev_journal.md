@@ -30,3 +30,10 @@ per search to stay within limits.
 **Remaining Limitation:** 
 Not suitable for very large codebases on free tier. Solution is 
 either Groq Dev tier or switching to Ollama for local inference.
+
+## Chunking problem
+**Problem:** When chunking a file using sliding window, it can divide a function into chunks. The function will loose their proper meaning this way.
+
+**Fix Applied:** To address this issue, i used AST(abstract syntax tree) based chunking. Instead of blindly cutting every 40 lines, you parse the code and cut at natural boundaries — functions, classes, methods.
+
+**remaining limitation:** This only works for python written code. To make it valid for all languages, we will be using tree-sitter(right now, at this stage, we wouldnt use it since installation would be complex. I'll integrate this after the completion of phase 7) 
