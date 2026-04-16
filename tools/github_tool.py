@@ -139,11 +139,11 @@ if __name__ == "__main__":
         print('python -m tools.github_tool "C:\\path\\to\\code" "https://github.com/owner/repo/issues/1"')
         print("\nTo test without a real issue, creating a mock test...")
 
-        mock_issue_title = "Attendance marked even when blink detection fails"
+        mock_issue_title = "blink_passed result not checked before marking attendance"
         mock_issue_body = """
-When a student stands in front of the camera, attendance is sometimes marked
-even when they don't blink. The liveness detection seems to not be blocking
-the attendance flow correctly when blink_count is 0.
+In main_attendance.py the process_student method calls wait_for_blink
+but does not check the return value before calling mark_attendance.
+Attendance gets marked even when blink_passed is False.
         """
 
         print(f"\nMock Issue: {mock_issue_title}")
@@ -163,10 +163,24 @@ the attendance flow correctly when blink_count is 0.
                   break
 
         full_code = ""
-        if first_file:
-            print(f"Reading full file: {first_file}")
-            full_code = read_file(first_file, codebase)
-            print(f"Full file content length: {len(full_code)} characters")
+        skip_extensions = [".md", ".txt", ".yaml", ".yml", ".json"]
+        files_read = []
+
+        for line in search_results.split("\n"):
+            if line.startswith("File:"):
+                candidate = line.replace("File:", "").strip()
+                if not any(candidate.endswith(ext) for ext in skip_extensions):
+                    if candidate not in files_read:
+                        files_read.append(candidate)
+
+        print(f"Reading {len(files_read)} relevant files...")
+        file_contents = []
+        for f in files_read:
+            content = read_file(f, codebase)
+            file_contents.append(f"=== {f} ===\n{content[:1500]}")
+            print(f"Read: {f}")
+
+        full_code = "\n\n".join(file_contents)
 
         prompt = f"""You are Wraith, an expert developer assistant.
 
