@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wraith — Codebase Intelligence</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0a;
+      color: #e0e0e0;
+      font-family: 'Courier New', monospace;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 24px 40px;
+      border-bottom: 1px solid #1e1e1e;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    header h1 {
+      font-size: 24px;
+      color: #ffffff;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+    }
+
+    header span {
+      font-size: 12px;
+      color: #555;
+      letter-spacing: 2px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      background: #00ff88;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: calc(100vh - 73px);
+    }
+
+    .sidebar {
+      border-right: 1px solid #1e1e1e;
+      padding: 24px 0;
+    }
+
+    .sidebar-section {
+      padding: 8px 24px;
+      margin-bottom: 4px;
+    }
+
+    .sidebar-label {
+      font-size: 10px;
+      color: #444;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      margin: 2px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #888;
+      transition: all 0.15s;
+      border: 1px solid transparent;
+    }
+
+    .nav-item:hover {
+      background: #111;
+      color: #ccc;
+    }
+
+    .nav-item.active {
+      background: #111;
+      color: #00ff88;
+      border-color: #1a3a2a;
+    }
+
+    .nav-icon { font-size: 16px; }
+
+    .codebase-box {
+      margin: 16px 8px;
+      padding: 12px;
+      background: #0f0f0f;
+      border: 1px solid #1e1e1e;
+      border-radius: 6px;
+    }
+
+    .codebase-box label {
+      font-size: 10px;
+      color: #444;
+      letter-spacing: 1px;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .codebase-box input {
+      width: 100%;
+      background: #000;
+      border: 1px solid #2a2a2a;
+      color: #e0e0e0;
+      padding: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .btn-ingest {
+      width: 100%;
+      padding: 8px;
+      background: #003322;
+      color: #00ff88;
+      border: 1px solid #005533;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      letter-spacing: 1px;
+      transition: all 0.15s;
+    }
+
+    .btn-ingest:hover { background: #004433; }
+
+    .main {
+      padding: 32px 40px;
+      overflow-y: auto;
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .panel-title {
+      font-size: 18px;
+      color: #fff;
+      margin-bottom: 8px;
+      letter-spacing: 2px;
+    }
+
+    .panel-desc {
+      font-size: 12px;
+      color: #555;
+      margin-bottom: 24px;
+      letter-spacing: 1px;
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 11px;
+      color: #555;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .input-group input,
+    .input-group textarea {
+      width: 100%;
+      background: #0f0f0f;
+      border: 1px solid #2a2a2a;
+      color: #e0e0e0;
+      padding: 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      border-radius: 6px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .input-group input:focus,
+    .input-group textarea:focus {
+      border-color: #00ff88;
+    }
+
+    .input-group textarea { resize: vertical; min-height: 80px; }
+
+    .btn-run {
+      padding: 12px 28px;
+      background: #003322;
+      color: #00ff88;
+      border: 1px solid #005533;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      letter-spacing: 2px;
+      transition: all 0.15s;
+    }
+
+    .btn-run:hover { background: #004433; }
+    .btn-run:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .output {
+      margin-top: 24px;
+      background: #0a0a0a;
+      border: 1px solid #1e1e1e;
+      border-radius: 6px;
+      padding: 20px;
+      min-height: 120px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #ccc;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .output.loading {
+      color: #555;
+      font-style: italic;
+    }
+
+    .output.error { color: #ff4444; border-color: #330000; }
+
+    .sources {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .source-tag {
+      padding: 4px 10px;
+      background: #0f1f17;
+      border: 1px solid #1a3a2a;
+      border-radius: 4px;
+      font-size: 11px;
+      color: #00cc66;
+    }
+
+    .status-bar {
+      margin-top: 8px;
+      font-size: 11px;
+      color: #444;
+      letter-spacing: 1px;
+    }
+
+    .tag-success { color: #00ff88; }
+    .tag-error { color: #ff4444; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="dot"></div>
+  <h1>Wraith</h1>
+  <span>CODEBASE INTELLIGENCE</span>
+</header>
+
+<div class="container">
+  <div class="sidebar">
+    <div class="codebase-box">
+      <label>CODEBASE PATH</label>
+      <input type="text" id="globalPath" placeholder="C:\path\to\project" />
+      <button class="btn-ingest" onclick="ingest()">⚡ INGEST</button>
+      <div class="status-bar" id="ingestStatus"></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Tools</div>
+      <div class="nav-item active" onclick="showPanel('ask')">
+        <span class="nav-icon">💬</span> Ask
+      </div>
+      <div class="nav-item" onclick="showPanel('agent')">
+        <span class="nav-icon">🤖</span> Agent
+      </div>
+      <div class="nav-item" onclick="showPanel('analyze')">
+        <span class="nav-icon">🔍</span> Analyze
+      </div>
+      <div class="nav-item" onclick="showPanel('issue')">
+        <span class="nav-icon">🐛</span> Issues
+      </div>
+      <div class="nav-item" onclick="showPanel('research')">
+        <span class="nav-icon">🌐</span> Research
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ASK PANEL -->
+    <div class="panel active" id="panel-ask">
+      <div class="panel-title">ASK</div>
+      <div class="panel-desc">Ask any question about your codebase</div>
+      <div class="input-group">
+        <label>YOUR QUESTION</label>
+        <textarea id="askQuestion" placeholder="How is face recognition implemented?"></textarea>
+      </div>
+      <button class="btn-run" onclick="runAsk()">RUN →</button>
+      <div class="output" id="askOutput">Waiting for input...</div>
+      <div class="sources" id="askSources"></div>
+    </div>
+
+    <!-- AGENT PANEL -->
+    <div class="panel" id="panel-agent">
+      <div class="panel-title">AGENT</div>
+      <div class="panel-desc">Multi-step reasoning with tool use</div>
+      <div class="input-group">
+        <label>YOUR QUESTION</label>
+        <textarea id="agentQuestion" placeholder="Find bugs in the liveness detection and explain how to fix them"></textarea>
+      </div>
+      <button class="btn-run" onclick="runAgent()">RUN →</button>
+      <div class="output" id="agentOutput">Waiting for input...</div>
+    </div>
+
+    <!-- ANALYZE PANEL -->
+    <div class="panel" id="panel-analyze">
+      <div class="panel-title">ANALYZE</div>
+      <div class="panel-desc">Detect bugs, security issues, and anti-patterns</div>
+      <button class="btn-run" onclick="runAnalyze()">RUN ANALYSIS →</button>
+      <div class="output" id="analyzeOutput">Waiting for input...</div>
+    </div>
+
+    <!-- ISSUE PANEL -->
+    <div class="panel" id="panel-issue">
+      <div class="panel-title">ISSUES</div>
+      <div class="panel-desc">Paste a GitHub issue URL to locate and fix the bug</div>
+      <div class="input-group">
+        <label>GITHUB ISSUE URL</label>
+        <input type="text" id="issueUrl" placeholder="https://github.com/owner/repo/issues/1" />
+      </div>
+      <button class="btn-run" onclick="runIssue()">SOLVE →</button>
+      <div class="output" id="issueOutput">Waiting for input...</div>
+    </div>
+
+    <!-- RESEARCH PANEL -->
+    <div class="panel" id="panel-research">
+      <div class="panel-title">RESEARCH</div>
+      <div class="panel-desc">Stack-aware web research grounded in your actual dependencies</div>
+      <div class="input-group">
+        <label>YOUR PROBLEM</label>
+        <textarea id="researchProblem" placeholder="How do I handle database connection pooling?"></textarea>
+      </div>
+      <button class="btn-run" onclick="runResearch()">SEARCH →</button>
+      <div class="output" id="researchOutput">Waiting for input...</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const API = "http://localhost:8000";
+
+  function showPanel(name) {
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+    document.getElementById("panel-" + name).classList.add("active");
+    event.currentTarget.classList.add("active");
+  }
+
+  function getPath() {
+    return document.getElementById("globalPath").value.trim();
+  }
+
+  function setOutput(id, text, isError = false) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = "output" + (isError ? " error" : "");
+  }
+
+  async function ingest() {
+    const path = getPath();
+    if (!path) { alert("Enter a codebase path first"); return; }
+    document.getElementById("ingestStatus").textContent = "Ingesting...";
+    try {
+      const res = await fetch(`${API}/ingest`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ codebase_path: path })
+      });
+      const data = await res.json();
+      document.getElementById("ingestStatus").innerHTML =
+        `<span class="tag-success">✓ ${data.files_found} files, ${data.chunks_stored} chunks</span>`;
+    } catch (e) {
+      document.getElementById("ingestStatus").innerHTML =
+        `<span class="tag-error">✗ ${e.message}</span>`;
+    }
+  }
+
+  async function runAsk() {
+    const path = getPath();
+    const question = document.getElementById("askQuestion").value.trim();
+    if (!path || !question) { alert("Fill in path and question"); return; }
+    setOutput("askOutput", "Thinking...", false);
+    document.getElementById("askSources").innerHTML = "";
+    try {
+      const res = await fetch(`${API}/ask`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ codebase_path: path, question })
+      });
+      const data = await res.json();
+      setOutput("askOutput", data.answer);
+      if (data.sources) {
+        document.getElementById("askSources").innerHTML = data.sources
+          .map(s => `<div class="source-tag">${s.file} ${s.lines}</div>`)
+          .join("");
+      }
+    } catch (e) {
+      setOutput("askOutput", e.message, true);
+    }
+  }
+
+  async function runAgent() {
+    const path = getPath();
+    const question = document.getElementById("agentQuestion").value.trim();
+    if (!path || !question) { alert("Fill in path and question"); return; }
+    setOutput("agentOutput", "Agent reasoning...", false);
+    try {
+      const res = await fetch(`${API}/agent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ codebase_path: path, question })
+      });
+      const data = await res.json();
+      setOutput("agentOutput", data.answer);
+    } catch (e) {
+      setOutput("agentOutput", e.message, true);
+    }
+  }
+
+  async function runAnalyze() {
+    const path = getPath();
+    if (!path) { alert("Enter a codebase path first"); return; }
+    setOutput("analyzeOutput", "Analyzing codebase... this may take a minute", false);
+    try {
+      const res = await fetch(`${API}/analyze`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ codebase_path: path })
+      });
+      const data = await res.json();
+      let text = "";
+      for (const r of data.file_analysis) {
+        text += `\n=== ${r.file} ===\n${r.issues}\n`;
+      }
+      setOutput("analyzeOutput", text.trim());
+    } catch (e) {
+      setOutput("analyzeOutput", e.message, true);
+    }
+  }
+
+  async function runIssue() {
+    const path = getPath();
+    const url = document.getElementById("issueUrl").value.trim();
+    if (!path || !url) { alert("Fill in path and issue URL"); return; }
+    setOutput("issueOutput", "Fetching and analyzing issue...", false);
+    try {
+      const res = await fetch(`${API}/issue`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ codebase_path: path, issue_url: url })
+      });
+      const data = await res.json();
+      setOutput("issueOutput", data.analysis || data.error);
+    } catch (e) {
+      setOutput("issueOutput", e.message, true);
+    }
+  }
+
+  async function runResearch() {
+    const path = getPath();
+    const problem = document.getElementById("researchProblem").value.trim();
+    if (!path || !problem) { alert("Fill in path and problem"); return; }
+    setOutput("researchOutput", "Searching the web...", false);
+    try {
+      const res = await fetch(`${API}/research`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ codebase_path: path, problem })
+      });
+      const data = await res.json();
+      setOutput("researchOutput",
+        `Stack: ${JSON.stringify(data.stack)}\n\n${data.recommendation}`
+      );
+    } catch (e) {
+      setOutput("researchOutput", e.message, true);
+    }
+  }
+</script>
+
+</body>
+</html>
