@@ -62,7 +62,7 @@ if __name__ == "__main__":
   test_path = sys.argv[1] if len(sys.argv) >1 else "."
   files = get_all_files(test_path)
 
-  print(f"\nCodeLens File Scanner")
+  print(f"\nWraith File Scanner")
   print(f"{'='*40}")
   print(f"Found {len(files)} files in: {test_path}")
   print(f"{'='*40}")
