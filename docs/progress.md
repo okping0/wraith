@@ -88,13 +88,14 @@ analyzes GitHub issues, and suggests fixes grounded in your actual code.
 ---
 
 ## Phase 6 — Web Research Assistant
-**Status:** In Progress
-**Files:** tools/web_research.py (to be created)
+**Status:** complete
+**Files:** tools/web_research.py 
 
-**What will be built:**
+**What was built:**
 - Automatic tech stack detection from codebase
 - Web search via DuckDuckGo (free, no API key)
 - Stack-aware recommendations grounded in actual dependencies
+- LLM synthesizes web results into recommendations for your exact stack
 
 ---
 
