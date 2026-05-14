@@ -74,7 +74,7 @@ if __name__ == "__main__":
 
     path = sys.argv[1] if len(sys.argv) > 1 else "."
 
-    print("=== CodeLens Phase 1 - Full Pipeline Test ===\n")
+    print("=== wraith Phase 1 - Full Pipeline Test ===\n")
 
     print("Step 1: Scanning files...")
     files = get_all_files(path)

@@ -60,6 +60,7 @@ active_codebase = {}
 
 app.mount("/static", StaticFiles(directory="api/static"), name="static")
 
+
 @app.get("/")
 def root():
     return FileResponse("api/static/index.html")
