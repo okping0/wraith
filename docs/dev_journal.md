@@ -37,3 +37,25 @@ either Groq Dev tier or switching to Ollama for local inference.
 **Fix Applied:** To address this issue, i used AST(abstract syntax tree) based chunking. Instead of blindly cutting every 40 lines, you parse the code and cut at natural boundaries — functions, classes, methods.
 
 **remaining limitation:** This only works for python written code. To make it valid for all languages, we will be using tree-sitter(right now, at this stage, we wouldnt use it since installation would be complex. I'll integrate this after the completion of phase 7) 
+
+
+
+# unsolved
+
+
+## if i inserted an issue's link inthe ask section, it blbbers
+**problem -** 1 _ UX problem. if a link is received, it should make the user aware. 
+
+2_This is actually the hallucination problem, but in a different form. The LLM gets chunks that are loosely related and starts connecting dots that don't exist
+
+**fix should be applied** The fix is in qa_engine.py — add a relevance threshold.
+
+
+
+# BUGS
+
+## github issue need cloning of the repo first.
+- right now you will have to do it manually, but after fixing the global space bug of vector db, i will implement automatic cloning
+
+
+-(SEARCH IMPROVEMENT IN THE CODEBASE TO SEE FOR MORE BUGS AND IMPROVEMENT PLANS)
