@@ -3,6 +3,7 @@ from tqdm import tqdm
 
 
 MODEL_NAME = "all-MiniLM-L6-v2"
+# improvement -  can change it to a more code specific embedder mayeb.
 BATCH_SIZE = 32
 
 class CodeEmbedder:

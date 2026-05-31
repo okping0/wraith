@@ -22,6 +22,7 @@ class WraithAgent:
     def _build_system_prompt(self) -> str:
         tool_descriptions = []
         for name, tool in TOOLS.items():
+            # here returning something like (tool name(whihc is name here), {dictonary of tools data like description parameters} (whihc is the tool here in for loop))
             tool_descriptions.append(
                 f"- {name}: {tool['description']}\n"
                 f"  params: {tool['params']}"

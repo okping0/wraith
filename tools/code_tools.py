@@ -13,7 +13,7 @@ def search_codebase(query: str, n_results: int = 3) -> str:
 
   if not results:
     return "No relevant Code found."
-  
+   
   output = []
   for i, r in enumerate(results):
     output.append(
@@ -25,6 +25,7 @@ def search_codebase(query: str, n_results: int = 3) -> str:
     )
     
   output = [o[:500] for o in output]
+#   improvement - result is cut to 500 characters individually
   return "\n".join(output)
 
 def read_file(file_path: str, codebase_path: str) -> str:
@@ -61,6 +62,7 @@ def get_file_summary(file_path: str, codebase_path: str) -> str:
     return f"First 50 lines of {file_path}:\n{preview}"
 
 
+
 TOOLS = {
     "search_codebase": {
         "fn": search_codebase,
@@ -81,5 +83,5 @@ TOOLS = {
         "fn": get_file_summary,
         "description": "Get the first 50 lines of a file as a quick summary.",
         "params": ["file_path", "codebase_path"]
-    }
+    },
 }

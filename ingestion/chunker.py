@@ -18,7 +18,7 @@ def get_function_chunks(source_code: str) -> list[dict]:
 
   for node in ast.walk(tree):
     if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-      start_line = node.lineno -1
+      start_line = node.lineno -1 # improvement - should be node.lineno only in think
       end_line = node.end_lineno
       chunk_lines = lines[start_line:end_line]
       chunk_text = "\n".join(chunk_lines)
@@ -127,6 +127,7 @@ def chunk_codebase(file_infos: list[dict], file_contents: list[str]) -> list[dic
     all_chunks.extend(file_chunks)
 
   return all_chunks
+# improvement - later remember to implement chunking based on tokens. i think that would be efficient and better maybe. 
 
 if __name__ == "__main__":
     import sys

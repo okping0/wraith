@@ -4,6 +4,8 @@ from chromadb.config import Settings
 COLLECTION_NAME = "wraith_chunks"
 PERSIST_DIR = "data/chromadb"
 
+# improvement - here the space is just one and evrything gets stored there. seperate it for different codebases
+
 class VectorStore:
     def __init__(self):
         self.client = chromadb.PersistentClient(
