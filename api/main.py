@@ -145,6 +145,8 @@ def solve_issue(request: IssueRequest):
         result = solver.solve_issue(request.issue_url)
         return result
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
