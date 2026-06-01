@@ -1,5 +1,6 @@
 import chromadb
 from chromadb.config import Settings
+import os
 
 COLLECTION_NAME = "wraith_chunks"
 PERSIST_DIR = "data/chromadb"
@@ -7,15 +8,28 @@ PERSIST_DIR = "data/chromadb"
 # improvement - here the space is just one and evrything gets stored there. seperate it for different codebases
 
 class VectorStore:
-    def __init__(self):
+
+    _instance = {}
+
+    def __new__(cls, codebase_path:str):
+        collection_name = os.path.basename(codebase_path)
+        if collection_name not in cls._instance:
+            cls._instance[collection_name] = super().__new__(cls)
+        return cls._instance[collection_name]
+
+    def __init__(self, codebase_path: str):
+
+        if hasattr(self, 'collection'):
+            return
+        collection_name = os.path.basename(codebase_path)
         self.client = chromadb.PersistentClient(
             path=PERSIST_DIR
         )
         self.collection = self.client.get_or_create_collection(
-            name=COLLECTION_NAME,
+            name=collection_name,
             metadata={"hnsw:space": "cosine"}
         )
-        print(f"Vector store ready. Collection: {COLLECTION_NAME}")
+        print(f"Vector store ready. Collection: {collection_name}")
 
     def add_chunks(self, embedded_chunks: list[dict]) -> None:
         print(f"\nStoring {len(embedded_chunks)} chunks in vector store...")
