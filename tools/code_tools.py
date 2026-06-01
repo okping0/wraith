@@ -4,25 +4,29 @@ from ingestion.file_parser import get_all_files, read_file as read_file_content
 from storage.vector_store import VectorStore
 from ingestion.embedder import CodeEmbedder
 
+RELEVANCE_THRESHOLD = 0.4
+
 embedder = CodeEmbedder()
-vector_store = VectorStore()
 
-def search_codebase(query: str, n_results: int = 3) -> str:
+def search_codebase(query: str, codebase_path: str, n_results: int = 3) -> str:
   query_embedding = embedder.embed_text(query)
-  results = vector_store.search(query_embedding, n_results)
-
+  results = VectorStore(codebase_path).search(query_embedding, n_results)
+  
   if not results:
     return "No relevant Code found."
    
   output = []
   for i, r in enumerate(results):
-    output.append(
-      f"Result {i+1}: \n"
-      f"File: {r['metadata']['file_path']}\n"
-      f"Lines: {r['metadata']['start_line']} - {r['metadata']['end_line']}\n"
-      f"Score: {r['score']:.3f}\n"
-      f"Code:\n{r['text']}\n"
-    )
+    if r['score'] >=RELEVANCE_THRESHOLD:
+        output.append(
+        f"Result {i+1}: \n"
+        f"File: {r['metadata']['file_path']}\n"
+        f"Lines: {r['metadata']['start_line']} - {r['metadata']['end_line']}\n"
+        f"Score: {r['score']:.3f}\n"
+        f"Code:\n{r['text']}\n"
+        )
+  if not output:
+      return "No relevant code found above confidence threshold"
     
   output = [o[:500] for o in output]
 #   improvement - result is cut to 500 characters individually
@@ -67,7 +71,7 @@ TOOLS = {
     "search_codebase": {
         "fn": search_codebase,
         "description": "Search the codebase semantically. Use this when you need to find code related to a concept or feature.",
-        "params": ["query"]
+        "params": ["query", "codebase_path"]
     },
     "read_file": {
         "fn": read_file,
