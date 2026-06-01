@@ -26,7 +26,6 @@ Build the retrieve → augment → generate pipeline. Ask questions, get answers
 
 These will be addressed in Phase 3 (Agent + Retrieval Improvements)
 
-### CURRENT - 
 ## Phase 3 — The Agent Brain & Tool Use
 Give assistant tools: search the vector DB, read a file, call the GitHub API, search the web. Build a reasoning loop that decides which tool to use and when.
 
@@ -41,3 +40,6 @@ Stack-aware search: detect your tech stack from the codebase, then answer questi
 
 ## Phase 7 — Dashboard & API
 FastAPI backend + a clean frontend so this feels like a real product, not a script.
+
+### CURRENT - 
+improving the whole app ui, ux, bugs, and making it ready for deployment
