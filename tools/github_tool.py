@@ -57,6 +57,7 @@ class GitHubIssueSolver:
 
         search_results = search_codebase(
             f"{issue['title']} {issue['body'][:200]}",
+            codebase_path=self.codebase_path,
             n_results=3
         )
 
@@ -77,9 +78,11 @@ class GitHubIssueSolver:
 
 A GitHub issue has been reported. Your job is to:
 1. Understand what the issue is describing
-2. Based on the code context provided, locate exactly where the problem is
-3. Explain why this causes the issue
-4. Suggest a specific fix with corrected code
+2. if the issue is already fixed, or not present, say so
+3. If not already fixed, and based on the code context provided, locate exactly where the problem is
+4. Explain why this causes the issue
+5. Suggest a specific fix with corrected code
+
 
 GitHub Issue Title: {issue['title']}
 
