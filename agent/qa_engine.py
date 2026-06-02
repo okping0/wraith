@@ -10,11 +10,11 @@ load_dotenv()
 
 MODEL = "llama-3.1-8b-instant"
 MAX_CONTEXT_CHUNKS = 5
+RELEVANCE_THRESHOLD = 0.4
 
 class QAEngine:
   def __init__(self):
     self.client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-    self.vector_store = VectorStore()
     self.embedder = CodeEmbedder()
     print("Wraith QA Engine ready")
 
@@ -55,15 +55,29 @@ Developer question: {question}
 
 Answer:"""
   
-  def ask(self, question: str) -> dict:
+  def ask(self, question: str, codebase_path: str) -> dict:
       print(f"\nSearching codebase forf : {question}")
-
+      vector_store = VectorStore(codebase_path)
       query_embedding = self.embedder.embed_text(question)
-      relevant_chunks = self.vector_store.search(
+      relevant_chunks = vector_store.search(
           query_embedding,
           n_results= MAX_CONTEXT_CHUNKS)
+      filtered_chunks = []
+      for chunk in relevant_chunks:
+          if(chunk['score']) >= RELEVANCE_THRESHOLD:
+              filtered_chunks.append(chunk)
+
+      print([c['score'] for c in relevant_chunks])
       
-      context = self._build_context(relevant_chunks)
+      if filtered_chunks == []:
+          return {
+              "question":question,
+              "answer": "no relevant chunks found",
+              "sources": []
+          }
+      print([c['score'] for c in relevant_chunks])
+          
+      context = self._build_context(filtered_chunks)
       prompt = self._build_prompt(question, context)
 
       print("Thinking...")

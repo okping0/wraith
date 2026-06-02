@@ -54,6 +54,10 @@ class ResearchRequest(BaseModel):
 
 # --- State ---
 active_codebase = {}
+print("about to create QAEngine")
+engine = QAEngine()
+print("QAEngine created")
+
 
 
 # --- Routes ---
@@ -76,7 +80,7 @@ def ingest(request: IngestRequest):
     try:
         from ingestion.file_parser import get_all_files, read_file
         from ingestion.chunker import chunk_codebase
-        from ingestion.embedder import CodeEmbedder
+        
         from storage.vector_store import VectorStore
 
         files = get_all_files(request.codebase_path)
@@ -85,11 +89,11 @@ def ingest(request: IngestRequest):
         from ingestion.chunker import chunk_codebase
         chunks = chunk_codebase(files, contents)
 
-        embedder = CodeEmbedder()
-        embedded = embedder.embed_chunks(chunks)
+        
+        embedded = engine.embedder.embed_chunks(chunks)
 
-        store = VectorStore()
-        store.clear()
+        store = VectorStore(request.codebase_path)
+        # store.clear()
         store.add_chunks(embedded)
 
         active_codebase["path"] = request.codebase_path
@@ -107,8 +111,7 @@ def ingest(request: IngestRequest):
 @app.post("/ask")
 def ask(request: QuestionRequest):
     try:
-        engine = QAEngine()
-        result = engine.ask(request.question)
+        result = engine.ask(request.question, request.codebase_path)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
