@@ -5,109 +5,482 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wraith — Codebase Intelligence</title>
   <link rel="stylesheet" href="/static/style.css">
-  <!-- Markdown renderer -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 </head>
 <body>
 
+<!-- ─── HEADER ─── -->
 <header>
-  <div class="dot"></div>
-  <h1>Wraith</h1>
-  <span>CODEBASE INTELLIGENCE</span>
-</header>
-
-<div class="container">
-
-  <!-- ─── SIDEBAR ─── -->
-  <div class="sidebar">
-
-    <div class="codebase-box">
-      <label>CODEBASE PATH</label>
-      <input type="text" id="globalPath" placeholder="C:\path\to\project" />
-      <button class="btn-ingest" onclick="ingest()">⚡ INGEST</button>
-      <div class="status-bar" id="ingestStatus"></div>
+  <div class="header-brand">
+    <div class="header-logo"></div>
+    <div class="header-brand-text">
+      <h1>WRAITH</h1>
+      <span>CODEBASE INTELLIGENCE</span>
     </div>
-
-    <div class="sidebar-label">Tools</div>
-
-    <div class="nav-item active" onclick="showPanel('ask', this)">
-      <span class="nav-icon">💬</span> Ask
-    </div>
-    <div class="nav-item" onclick="showPanel('agent', this)">
-      <span class="nav-icon">🤖</span> Agent
-    </div>
-    <div class="nav-item" onclick="showPanel('analyze', this)">
-      <span class="nav-icon">🔍</span> Analyze
-    </div>
-    <div class="nav-item" onclick="showPanel('issue', this)">
-      <span class="nav-icon">🐛</span> Issues
-    </div>
-    <div class="nav-item" onclick="showPanel('research', this)">
-      <span class="nav-icon">🌐</span> Research
-    </div>
-
   </div>
 
-  <!-- ─── MAIN ─── -->
-  <div class="main">
-
-    <!-- ASK -->
-    <div class="panel active" id="panel-ask">
-      <div class="panel-title">ASK</div>
-      <div class="panel-desc">Ask any question about your codebase</div>
-      <div class="input-group">
-        <label>Your Question</label>
-        <textarea id="askQuestion" placeholder="How is face recognition implemented?"></textarea>
+  <nav class="header-nav">
+    <div class="nav-tabs">
+      <div class="nav-tab active" onclick="showPanel('ask', this)" data-panel="ask">
+        <span class="nav-tab-icon"></span> Ask
       </div>
-      <button class="btn-run" id="btnAsk" data-label="RUN →" onclick="runAsk()">RUN →</button>
-      <div class="output placeholder" id="askOutput">Waiting for input...</div>
-      <div class="sources" id="askSources"></div>
-    </div>
-
-    <!-- AGENT -->
-    <div class="panel" id="panel-agent">
-      <div class="panel-title">AGENT</div>
-      <div class="panel-desc">Multi-step reasoning with tool use</div>
-      <div class="input-group">
-        <label>Your Question</label>
-        <textarea id="agentQuestion" placeholder="Find bugs in the liveness detection and explain how to fix them"></textarea>
+      <div class="nav-tab" onclick="showPanel('agent', this)" data-panel="agent">
+        <span class="nav-tab-icon"></span> Agent
       </div>
-      <button class="btn-run" id="btnAgent" data-label="RUN →" onclick="runAgent()">RUN →</button>
-      <div class="output placeholder" id="agentOutput">Waiting for input...</div>
-    </div>
-
-    <!-- ANALYZE -->
-    <div class="panel" id="panel-analyze">
-      <div class="panel-title">ANALYZE</div>
-      <div class="panel-desc">Detect bugs, security issues, and anti-patterns across your codebase</div>
-      <button class="btn-run" id="btnAnalyze" data-label="RUN ANALYSIS →" onclick="runAnalyze()">RUN ANALYSIS →</button>
-      <div class="output placeholder" id="analyzeOutput">Waiting for input...</div>
-    </div>
-
-    <!-- ISSUES -->
-    <div class="panel" id="panel-issue">
-      <div class="panel-title">ISSUES</div>
-      <div class="panel-desc">Paste a GitHub issue URL to locate and solve the bug</div>
-      <div class="input-group">
-        <label>GitHub Issue URL</label>
-        <input type="text" id="issueUrl" placeholder="https://github.com/owner/repo/issues/1" />
+      <div class="nav-tab" onclick="showPanel('analyze', this)" data-panel="analyze">
+        <span class="nav-tab-icon"></span> Analyze
       </div>
-      <button class="btn-run" id="btnIssue" data-label="SOLVE →" onclick="runIssue()">SOLVE →</button>
-      <div class="output placeholder" id="issueOutput">Waiting for input...</div>
-    </div>
-
-    <!-- RESEARCH -->
-    <div class="panel" id="panel-research">
-      <div class="panel-title">RESEARCH</div>
-      <div class="panel-desc">Stack-aware web research grounded in your actual dependencies</div>
-      <div class="input-group">
-        <label>Your Problem</label>
-        <textarea id="researchProblem" placeholder="How do I handle database connection pooling?"></textarea>
+      <div class="nav-tab" onclick="showPanel('issue', this)" data-panel="issue">
+        <span class="nav-tab-icon"></span> Issues
       </div>
-      <button class="btn-run" id="btnResearch" data-label="SEARCH →" onclick="runResearch()">SEARCH →</button>
-      <div class="output placeholder" id="researchOutput">Waiting for input...</div>
+      <div class="nav-tab" onclick="showPanel('research', this)" data-panel="research">
+        <span class="nav-tab-icon"></span> Research
+      </div>
+    </div>
+  </nav>
+
+  <div class="header-right">
+    <div class="codebase-status" id="codebaseStatus" style="display:none;">
+      <div class="status-dot"></div>
+      <span>Codebase Ready</span>
+    </div>
+    <div class="header-path-pill">
+      <span class="path-icon"></span>
+      <input type="text" id="globalPath" placeholder="C:\path\to\project" />
+      <span style="color:var(--text-muted);font-size:11px;">▾</span>
+    </div>
+    <button class="btn-ingest" onclick="ingest()">
+      <span class="ingest-star">✦</span> INGEST
+    </button>
+  </div>
+</header>
+
+<!-- ─── PANELS ─── -->
+
+<!-- ASK -->
+<div class="panel active" id="panel-ask">
+  <div class="main-wrapper">
+    <div class="panel-left">
+      <div class="panel-header">
+        <span class="panel-spark">✨</span>
+        <h2 class="panel-title">Ask <span class="highlight">anything</span> about your codebase</h2>
+      </div>
+
+      <div class="input-ghost-wrap">
+        <div class="input-card">
+          <textarea id="askQuestion" placeholder="How is face recognition implemented?" rows="4"></textarea>
+          <div class="input-card-footer">
+            <button class="icon-btn" title="Attach file">📎</button>
+            <button class="icon-btn" title="Options">⊹</button>
+            <button class="btn-run" id="btnAsk" data-label="▶" onclick="runAsk()" title="Run">▶</button>
+          </div>
+        </div>
+        <div class="ghost-deco">
+          <!-- Ghost SVG - coding ghost -->
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <!-- glow base -->
+            <ellipse cx="100" cy="130" rx="55" ry="55" fill="rgba(160,120,255,0.08)"/>
+            <!-- ghost body -->
+            <path d="M55 90 Q55 45 100 45 Q145 45 145 90 L145 155 Q135 145 125 155 Q115 145 105 155 Q95 145 85 155 Q75 145 65 155 Q55 145 55 155 Z" fill="#c8aaff" opacity="0.92"/>
+            <!-- eyes -->
+            <circle cx="85" cy="88" r="8" fill="#3a1a7a"/>
+            <circle cx="115" cy="88" r="8" fill="#3a1a7a"/>
+            <circle cx="87" cy="86" r="3" fill="white"/>
+            <circle cx="117" cy="86" r="3" fill="white"/>
+            <!-- blush -->
+            <ellipse cx="76" cy="100" rx="6" ry="3.5" fill="#f9a8d4" opacity="0.6"/>
+            <ellipse cx="124" cy="100" rx="6" ry="3.5" fill="#f9a8d4" opacity="0.6"/>
+            <!-- laptop -->
+            <rect x="65" y="118" width="50" height="30" rx="4" fill="#2a1a6a" opacity="0.85"/>
+            <rect x="68" y="121" width="44" height="22" rx="2" fill="#1a0a4a"/>
+            <rect x="58" y="148" width="64" height="4" rx="2" fill="#3a2a8a" opacity="0.7"/>
+            <!-- code lines on screen -->
+            <line x1="72" y1="127" x2="88" y2="127" stroke="#7c5cfc" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="72" y1="132" x2="96" y2="132" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="76" y1="137" x2="90" y2="137" stroke="#7c5cfc" stroke-width="1.5" stroke-linecap="round"/>
+            <!-- mug -->
+            <rect x="122" y="130" width="14" height="14" rx="3" fill="#5c3fc0" opacity="0.9"/>
+            <path d="M136 135 Q142 135 142 140 Q142 145 136 145" stroke="#7c5cfc" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <!-- steam -->
+            <path d="M126 128 Q128 125 126 122" stroke="#a78bfa" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.5"/>
+            <path d="M130 128 Q132 124 130 121" stroke="#a78bfa" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.5"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Response -->
+      <div class="response-card" id="askResponseCard">
+        <div class="response-header">
+          <div class="response-header-left">
+            <div class="response-avatar"></div>
+            <span class="response-name">Wraith's Response</span>
+          </div>
+          <div class="response-timing" id="askTiming" style="display:none;">
+            <div class="timing-dot"></div>
+            <span id="askTimingText">Ready</span>
+          </div>
+        </div>
+
+        <div class="response-body placeholder" id="askOutput">Waiting for input...</div>
+
+        <div id="askSourceFileInline" style="display:none;">
+          <!-- populated dynamically -->
+        </div>
+
+        <div class="response-footer">
+          <div class="sources-toggle" id="askSourcesToggle" onclick="toggleSources('ask')">
+            <span class="toggle-icon"></span>
+            <span id="askSourcesLabel">Sources (0)</span>
+            <span class="chevron">▾</span>
+          </div>
+          <div class="response-actions">
+            <button class="action-btn" title="Copy">⧉</button>
+            <button class="action-btn" title="Helpful">👍︎</button>
+            <button class="action-btn" title="Not helpful">👎︎</button>
+          </div>
+        </div>
+        <div class="sources-list" id="askSources"></div>
+      </div>
+
+      <!-- Wraith bottom bar -->
+      <div class="wraith-bar">
+        <div class="wraith-bar-avatar"></div>
+        <div class="wraith-bar-text">
+          <div class="wraith-bar-name">Wraith</div>
+          <div class="wraith-bar-sub">Always here to help ♥</div>
+        </div>
+      </div>
     </div>
 
+    <!-- Right sidebar -->
+    <div class="panel-right">
+      <div class="side-card">
+        <div class="side-card-header">
+          <div class="side-card-header-left">
+            <span class="side-card-icon"></span>
+            <span class="side-card-title">Sources</span>
+          </div>
+          <svg class="side-ghost-mini" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 28 Q15 10 30 10 Q45 10 45 28 L45 50 Q40 45 35 50 Q30 45 25 50 Q20 45 15 50 Z" fill="#7c5cfc" opacity="0.35"/>
+            <circle cx="24" cy="28" r="4" fill="#3a1a7a" opacity="0.6"/>
+            <circle cx="36" cy="28" r="4" fill="#3a1a7a" opacity="0.6"/>
+          </svg>
+        </div>
+        <div class="sources-list-right" id="askSourcesRight">
+          <div style="font-size:13px;color:var(--text-muted);padding:8px 0;text-align:center;">No sources yet.</div>
+        </div>
+        <button class="btn-view-all" id="askViewAll" style="display:none;" onclick="alert('View all references')">
+          VIEW ALL REFERENCES <span>→</span>
+        </button>
+      </div>
+
+      <div class="wraith-core-card">
+        <div class="wraith-core-ghost">
+          <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="60" cy="80" rx="35" ry="35" fill="rgba(160,120,255,0.1)"/>
+            <path d="M28 58 Q28 20 60 20 Q92 20 92 58 L92 95 Q84 88 76 95 Q68 88 60 95 Q52 88 44 95 Q36 88 28 95 Z" fill="#c8aaff" opacity="0.9"/>
+            <circle cx="48" cy="56" r="7" fill="#3a1a7a"/>
+            <circle cx="72" cy="56" r="7" fill="#3a1a7a"/>
+            <circle cx="50" cy="54" r="3" fill="white"/>
+            <circle cx="74" cy="54" r="3" fill="white"/>
+            <ellipse cx="43" cy="66" rx="5" ry="3" fill="#f9a8d4" opacity="0.55"/>
+            <ellipse cx="77" cy="66" rx="5" ry="3" fill="#f9a8d4" opacity="0.55"/>
+          </svg>
+        </div>
+        <div class="wraith-core-name">Wraith Core</div>
+        <div class="wraith-core-desc">Spectral intelligence for understanding large codebases.</div>
+      </div>
+
+      <div id="ingestStatusRight" style="font-size:11px;text-align:center;padding:4px 0;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- AGENT -->
+<div class="panel" id="panel-agent">
+  <div class="main-wrapper">
+    <div class="panel-left">
+      <div class="panel-header">
+        <span class="panel-spark"></span>
+        <h2 class="panel-title">Agent <span class="highlight">reasoning</span> with tool use</h2>
+      </div>
+      <div class="input-ghost-wrap">
+        <div class="input-card">
+          <textarea id="agentQuestion" placeholder="Find bugs in the liveness detection and explain how to fix them" rows="4"></textarea>
+          <div class="input-card-footer">
+            <button class="icon-btn">📎</button>
+            <button class="icon-btn">⊹</button>
+            <button class="btn-run" id="btnAgent" data-label="▶" onclick="runAgent()" title="Run">▶</button>
+          </div>
+        </div>
+        <div class="ghost-deco">
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="100" cy="130" rx="55" ry="55" fill="rgba(160,120,255,0.08)"/>
+            <path d="M55 90 Q55 45 100 45 Q145 45 145 90 L145 155 Q135 145 125 155 Q115 145 105 155 Q95 145 85 155 Q75 145 65 155 Q55 145 55 155 Z" fill="#c8aaff" opacity="0.85"/>
+            <circle cx="85" cy="88" r="8" fill="#3a1a7a"/>
+            <circle cx="115" cy="88" r="8" fill="#3a1a7a"/>
+            <circle cx="87" cy="86" r="3" fill="white"/>
+            <circle cx="117" cy="86" r="3" fill="white"/>
+            <ellipse cx="76" cy="100" rx="6" ry="3.5" fill="#f9a8d4" opacity="0.55"/>
+            <ellipse cx="124" cy="100" rx="6" ry="3.5" fill="#f9a8d4" opacity="0.55"/>
+          </svg>
+        </div>
+      </div>
+      <div class="response-card">
+        <div class="response-header">
+          <div class="response-header-left">
+            <div class="response-avatar"></div>
+            <span class="response-name">Wraith's Response</span>
+          </div>
+          <div class="response-timing" id="agentTiming" style="display:none;">
+            <div class="timing-dot"></div>
+            <span id="agentTimingText">Ready</span>
+          </div>
+        </div>
+        <div class="response-body placeholder" id="agentOutput">Waiting for input...</div>
+        <div class="response-footer">
+          <div></div>
+          <div class="response-actions">
+            <button class="action-btn">⧉</button>
+            <button class="action-btn">👍︎</button>
+            <button class="action-btn">👎︎</button>
+          </div>
+        </div>
+      </div>
+      <div class="wraith-bar">
+        <div class="wraith-bar-avatar"></div>
+        <div class="wraith-bar-text">
+          <div class="wraith-bar-name">Wraith</div>
+          <div class="wraith-bar-sub">Always here to help ♥</div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-right">
+      <div class="wraith-core-card">
+        <div class="wraith-core-ghost">
+          <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="60" cy="80" rx="35" ry="35" fill="rgba(160,120,255,0.1)"/>
+            <path d="M28 58 Q28 20 60 20 Q92 20 92 58 L92 95 Q84 88 76 95 Q68 88 60 95 Q52 88 44 95 Q36 88 28 95 Z" fill="#c8aaff" opacity="0.9"/>
+            <circle cx="48" cy="56" r="7" fill="#3a1a7a"/>
+            <circle cx="72" cy="56" r="7" fill="#3a1a7a"/>
+            <circle cx="50" cy="54" r="3" fill="white"/>
+            <circle cx="74" cy="54" r="3" fill="white"/>
+          </svg>
+        </div>
+        <div class="wraith-core-name">Wraith Agent</div>
+        <div class="wraith-core-desc">Multi-step reasoning with tool use across your entire codebase.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ANALYZE -->
+<div class="panel" id="panel-analyze">
+  <div class="main-wrapper">
+    <div class="panel-left">
+      <div class="panel-header">
+        <span class="panel-spark"></span>
+        <h2 class="panel-title"><span class="highlight">Analyze</span> your codebase</h2>
+      </div>
+      <div class="analyze-intro">
+        <span class="analyze-intro-icon"></span>
+        <div class="analyze-intro-text">
+          <h2>Deep Code Analysis</h2>
+          <p>Detects bugs, security issues, and anti-patterns across your entire codebase. Uses the ingested path above.</p>
+        </div>
+      </div>
+      <button class="btn-run-large" id="btnAnalyze" data-label="RUN ANALYSIS →" onclick="runAnalyze()">🔍 RUN ANALYSIS →</button>
+      <div class="response-card" style="margin-top:16px;">
+        <div class="response-header">
+          <div class="response-header-left">
+            <div class="response-avatar"></div>
+            <span class="response-name">Analysis Results</span>
+          </div>
+          <div class="response-timing" id="analyzeTiming" style="display:none;">
+            <div class="timing-dot"></div>
+            <span id="analyzeTimingText">Ready</span>
+          </div>
+        </div>
+        <div class="response-body placeholder" id="analyzeOutput">Waiting for input...</div>
+        <div class="response-footer">
+          <div></div>
+          <div class="response-actions">
+            <button class="action-btn">⧉</button>
+            <button class="action-btn">👍︎</button>
+            <button class="action-btn">👎︎</button>
+          </div>
+        </div>
+      </div>
+      <div class="wraith-bar">
+        <div class="wraith-bar-avatar"></div>
+        <div class="wraith-bar-text">
+          <div class="wraith-bar-name">Wraith</div>
+          <div class="wraith-bar-sub">Always here to help ♥</div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-right">
+      <div class="wraith-core-card">
+        <div class="wraith-core-ghost">
+          <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="60" cy="80" rx="35" ry="35" fill="rgba(160,120,255,0.1)"/>
+            <path d="M28 58 Q28 20 60 20 Q92 20 92 58 L92 95 Q84 88 76 95 Q68 88 60 95 Q52 88 44 95 Q36 88 28 95 Z" fill="#c8aaff" opacity="0.9"/>
+            <circle cx="48" cy="56" r="7" fill="#3a1a7a"/>
+            <circle cx="72" cy="56" r="7" fill="#3a1a7a"/>
+            <circle cx="50" cy="54" r="3" fill="white"/>
+            <circle cx="74" cy="54" r="3" fill="white"/>
+          </svg>
+        </div>
+        <div class="wraith-core-name">Security Scanner</div>
+        <div class="wraith-core-desc">Identifies vulnerabilities, anti-patterns and code quality issues.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ISSUES -->
+<div class="panel" id="panel-issue">
+  <div class="main-wrapper">
+    <div class="panel-left">
+      <div class="panel-header">
+        <span class="panel-spark"></span>
+        <h2 class="panel-title">Solve <span class="highlight">GitHub issues</span> instantly</h2>
+      </div>
+      <div class="input-ghost-wrap">
+        <div class="input-card">
+          <input type="text" id="issueUrl" placeholder="https://github.com/owner/repo/issues/1" />
+          <div class="input-card-footer">
+            <button class="btn-run" id="btnIssue" data-label="▶" onclick="runIssue()" title="Solve">▶</button>
+          </div>
+        </div>
+        <div class="ghost-deco">
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <path d="M55 90 Q55 45 100 45 Q145 45 145 90 L145 155 Q135 145 125 155 Q115 145 105 155 Q95 145 85 155 Q75 145 65 155 Q55 145 55 155 Z" fill="#c8aaff" opacity="0.85"/>
+            <circle cx="85" cy="88" r="8" fill="#3a1a7a"/>
+            <circle cx="115" cy="88" r="8" fill="#3a1a7a"/>
+            <circle cx="87" cy="86" r="3" fill="white"/>
+            <circle cx="117" cy="86" r="3" fill="white"/>
+          </svg>
+        </div>
+      </div>
+      <div class="response-card">
+        <div class="response-header">
+          <div class="response-header-left">
+            <div class="response-avatar"></div>
+            <span class="response-name">Issue Analysis</span>
+          </div>
+          <div class="response-timing" id="issueTiming" style="display:none;">
+            <div class="timing-dot"></div>
+            <span id="issueTimingText">Ready</span>
+          </div>
+        </div>
+        <div class="response-body placeholder" id="issueOutput">Waiting for input...</div>
+        <div class="response-footer">
+          <div></div>
+          <div class="response-actions">
+            <button class="action-btn">⧉</button>
+            <button class="action-btn">👍︎</button>
+            <button class="action-btn">👎︎</button>
+          </div>
+        </div>
+      </div>
+      <div class="wraith-bar">
+        <div class="wraith-bar-avatar"></div>
+        <div class="wraith-bar-text">
+          <div class="wraith-bar-name">Wraith</div>
+          <div class="wraith-bar-sub">Always here to help ♥</div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-right">
+      <div class="wraith-core-card">
+        <div class="wraith-core-ghost">
+          <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <path d="M28 58 Q28 20 60 20 Q92 20 92 58 L92 95 Q84 88 76 95 Q68 88 60 95 Q52 88 44 95 Q36 88 28 95 Z" fill="#c8aaff" opacity="0.9"/>
+            <circle cx="48" cy="56" r="7" fill="#3a1a7a"/>
+            <circle cx="72" cy="56" r="7" fill="#3a1a7a"/>
+            <circle cx="50" cy="54" r="3" fill="white"/>
+            <circle cx="74" cy="54" r="3" fill="white"/>
+          </svg>
+        </div>
+        <div class="wraith-core-name">Issue Solver</div>
+        <div class="wraith-core-desc">Fetches GitHub issues and locates the relevant code to fix them.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESEARCH -->
+<div class="panel" id="panel-research">
+  <div class="main-wrapper">
+    <div class="panel-left">
+      <div class="panel-header">
+        <span class="panel-spark"></span>
+        <h2 class="panel-title"><span class="highlight">Research</span> stack-aware solutions</h2>
+      </div>
+      <div class="input-ghost-wrap">
+        <div class="input-card">
+          <textarea id="researchProblem" placeholder="How do I handle database connection pooling?" rows="4"></textarea>
+          <div class="input-card-footer">
+            <button class="icon-btn">📎</button>
+            <button class="icon-btn">⊹</button>
+            <button class="btn-run" id="btnResearch" data-label="▶" onclick="runResearch()" title="Search">▶</button>
+          </div>
+        </div>
+        <div class="ghost-deco">
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <path d="M55 90 Q55 45 100 45 Q145 45 145 90 L145 155 Q135 145 125 155 Q115 145 105 155 Q95 145 85 155 Q75 145 65 155 Q55 145 55 155 Z" fill="#c8aaff" opacity="0.85"/>
+            <circle cx="85" cy="88" r="8" fill="#3a1a7a"/>
+            <circle cx="115" cy="88" r="8" fill="#3a1a7a"/>
+            <circle cx="87" cy="86" r="3" fill="white"/>
+            <circle cx="117" cy="86" r="3" fill="white"/>
+          </svg>
+        </div>
+      </div>
+      <div class="response-card">
+        <div class="response-header">
+          <div class="response-header-left">
+            <div class="response-avatar"></div>
+            <span class="response-name">Research Results</span>
+          </div>
+          <div class="response-timing" id="researchTiming" style="display:none;">
+            <div class="timing-dot"></div>
+            <span id="researchTimingText">Ready</span>
+          </div>
+        </div>
+        <div class="response-body placeholder" id="researchOutput">Waiting for input...</div>
+        <div class="response-footer">
+          <div></div>
+          <div class="response-actions">
+            <button class="action-btn">⧉</button>
+            <button class="action-btn">👍︎</button>
+            <button class="action-btn">👎︎</button>
+          </div>
+        </div>
+      </div>
+      <div class="wraith-bar">
+        <div class="wraith-bar-avatar"></div>
+        <div class="wraith-bar-text">
+          <div class="wraith-bar-name">Wraith</div>
+          <div class="wraith-bar-sub">Always here to help ♥</div>
+        </div>
+      </div>
+    </div>
+    <div class="panel-right">
+      <div class="wraith-core-card">
+        <div class="wraith-core-ghost">
+          <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <path d="M28 58 Q28 20 60 20 Q92 20 92 58 L92 95 Q84 88 76 95 Q68 88 60 95 Q52 88 44 95 Q36 88 28 95 Z" fill="#c8aaff" opacity="0.9"/>
+            <circle cx="48" cy="56" r="7" fill="#3a1a7a"/>
+            <circle cx="72" cy="56" r="7" fill="#3a1a7a"/>
+            <circle cx="50" cy="54" r="3" fill="white"/>
+            <circle cx="74" cy="54" r="3" fill="white"/>
+          </svg>
+        </div>
+        <div class="wraith-core-name">Web Research</div>
+        <div class="wraith-core-desc">Stack-aware web research grounded in your actual dependencies.</div>
+      </div>
+    </div>
   </div>
 </div>
 
