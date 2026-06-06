@@ -1,45 +1,83 @@
 # Wraith
 > It knows your code better than you do.
 
-A codebase-aware developer assistant that understands your code,
-answers questions with file and line references, detects bugs,
-reads GitHub issues, and suggests fixes.
+## The Story
 
-## Built With
-- Python 3.10
-- ChromaDB
-- Sentence Transformers
-- FastAPI (Phase 7)
+Everyone around me was doing open source contributions, so I decided to give it a try. I opened a large codebase and felt completely lost — no idea where anything was, what connected to what, or where to even start. That's when it clicked: what if there was a tool that could just *tell* you?
 
-## Phase 1 — Foundation & Ingestion Engine
-Project setup, folder structure, parsing a real codebase into chunks, generating embeddings, storing in a vector DB. Understanding why chunking strategy matters and how semantic search works.
-(COMPLETED)
+Wraith is a codebase-aware AI agent. Paste a GitHub repo URL, and start asking questions. No cloning, no IDE setup, no local environment needed.
 
+It's built for developers who are new to a codebase, or open source contributors who want help understanding and solving real issues.
 
-## Phase 2 — The Q&A Core (RAG from scratch)
-Build the retrieve → augment → generate pipeline. Ask questions, get answers with file + line references. No magic wrappers.
-(COMPLETED)
-### Known Limitations (Phase 2)
-- May hallucinate implementation details
-- Retrieval may miss relevant files
-- Responses may repeat or lack grounding
+## Live Demo
+🔗 [wraith-6efg.onrender.com](https://wraith-6efg.onrender.com)
 
-These will be addressed in Phase 3 (Agent + Retrieval Improvements)
+> Note: Hosted on Render free tier — first load may take ~50 seconds to wake up.
 
-## Phase 3 — The Agent Brain & Tool Use
-Give assistant tools: search the vector DB, read a file, call the GitHub API, search the web. Build a reasoning loop that decides which tool to use and when.
+## Features
 
-## Phase 4 — Bug Detection & Security Analysis
-Static analysis integration + LLM-powered anti-pattern detection. The agent reads code and flags issues with explanations.
+- **Q&A Engine** — Ask anything about a codebase. Get answers with file and line references.
+- **Agent** — Give Wraith a task and it reasons through which tools to use to solve it.
+- **Analyzer** — Scans the codebase for bugs, anti-patterns, and potential issues.
+- **GitHub Issues** — Paste an issue URL and Wraith analyzes it against the actual codebase.
+- **Web Research** — Research coding problems with context from your actual tech stack.
 
-## Phase 5 — GitHub Issues Integration
-Pull issues via API, run the full issue → locate → fix → explain pipeline.
+## What Makes It Different
 
-## Phase 6 — Web Research Assistant
-Stack-aware search: detect your tech stack from the codebase, then answer questions using live web search grounded in your actual dependencies.
+Tools like Copilot and Cursor require you to have the code locally and install IDE extensions. Wraith just needs a GitHub URL — paste it, hit ingest, start asking questions.
 
-## Phase 7 — Dashboard & API
-FastAPI backend + a clean frontend so this feels like a real product, not a script.
+## How It Works
+GitHub URL → git clone → file parsing → AST chunking →
+Jina embeddings → ChromaDB → semantic search → LLaMA 3 → answer
 
-### CURRENT - 
-improving the whole app ui, ux, bugs, and making it ready for deployment
+- Files are parsed and chunked using AST-based splitting for Python (functions and classes as chunks) with sliding window fallback for other languages
+- Chunks are embedded using Jina's `jina-embeddings-v2-base-code` model
+- Stored in ChromaDB for semantic search
+- A ReAct agent loop decides which tools to use for each query
+- LLaMA 3.1 8B Instant (via Groq) generates the final response
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Language | Python 3.10+ |
+| Backend | FastAPI |
+| Frontend | HTML, CSS, JavaScript |
+| Embeddings | Jina AI |
+| LLM | LLaMA 3.1 8B via Groq |
+| Vector DB | ChromaDB |
+
+## Getting Started
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/okping0/wraith
+cd wraith
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Set up environment variables
+cp .env.example .env
+# Add your GROQ_API_KEY and JINA_API_KEY
+
+# 4. Run the server
+uvicorn api.main:app --reload
+```
+
+Then open `http://localhost:8000` and paste a GitHub repo URL to get started.
+
+## Roadmap
+
+- [ ] Auto-clone directly from a gitHub issue URL
+- [ ] User authentication and persistent sessions
+- [ ] Parallel embedding for faster ingestion
+- [ ] Local mode — fully offline with Ollama + local embeddings for privacy-sensitive codebases
+- [ ] Support for private repositories
+- [ ] Full open source automation pipeline
+
+## Known Limitations
+
+- In-memory ChromaDB — ingested data is lost on server restart
+- Large repos (1000+ chunks) take longer to ingest due to Jina API rate limits
+- Agent tool calling is text-based (Groq free tier workaround)
