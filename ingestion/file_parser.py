@@ -6,7 +6,7 @@ SUPPORTED_EXTENSIONS = {
 }
 
 IGNORED_DIRS = {
-  ".git", "__pycache__", "node_modules", "venv",".venv", "env", "dist", "build", ".idea", ".vscode", "coverage", ".pytest_cache"
+  ".git", "__pycache__", "node_modules", "venv",".venv", "env", "dist", "build", ".idea", ".vscode", "coverage", ".pytest_cache","lib", "libs", "vendor", "third_party", "external", "weights", "checkpoints"
 }
 
 def get_all_files(root_path: str) -> list[dict]:
@@ -51,10 +51,14 @@ def get_all_files(root_path: str) -> list[dict]:
 
 def read_file(file_info:dict) -> str | None:
   try:
-    with open(file_info["path"], "r", encoding="utf-8", errors = "ignore") as f:
+    with open(file_info["path"], "r", encoding="utf-8") as f:
       return f.read()
-  except Exception:
-    return None
+  except UnicodeDecodeError:
+    try:
+      with open(file_info["path"], "r", encoding="utf-16") as f:
+        return f.read()
+    except Exception:
+      return None
   
 if __name__ == "__main__":
   import sys
