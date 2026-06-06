@@ -1,5 +1,9 @@
 import os
 import sys
+import tempfile
+import shutil
+import subprocess
+
 sys.path.append("..")
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
@@ -59,6 +63,14 @@ engine = QAEngine()
 print("QAEngine created")
 
 
+def resolve_path(codebase_path: str) -> tuple[str, bool]:
+    """Returns(actual_path, is_temp). If is_temp=True caller must delete after"""
+    if codebase_path.startswith("https://github.com"):
+        tmp_dir = tempfile.mkdtemp()
+        subprocess.run(["git", "clone", codebase_path, tmp_dir], check=True)
+        return tmp_dir, True
+    return codebase_path, False
+
 
 # --- Routes ---
 
@@ -83,8 +95,14 @@ def ingest(request: IngestRequest):
         
         from storage.vector_store import VectorStore
 
-        files = get_all_files(request.codebase_path)
-        contents = [read_file(f) for f in files]
+        path, is_temp = resolve_path(request.codebase_path)
+        try:
+            files = get_all_files(path)
+            contents = [read_file(f) for f in files]
+
+        finally:
+            if is_temp:
+                shutil.rmtree(path)
 
         from ingestion.chunker import chunk_codebase
         chunks = chunk_codebase(files, contents)
