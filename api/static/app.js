@@ -1,4 +1,4 @@
-const API = "http://localhost:8000";
+const API = "";
 
 // ─── PANEL NAVIGATION ───────────────────────────────────────────
 function showPanel(name, clickedEl) {
