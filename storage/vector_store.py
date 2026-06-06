@@ -3,7 +3,6 @@ from chromadb.config import Settings
 import os
 
 COLLECTION_NAME = "wraith_chunks"
-PERSIST_DIR = "data/chromadb"
 
 # improvement - here the space is just one and evrything gets stored there. seperate it for different codebases
 
@@ -22,9 +21,7 @@ class VectorStore:
         if hasattr(self, 'collection'):
             return
         collection_name = os.path.basename(codebase_path)
-        self.client = chromadb.PersistentClient(
-            path=PERSIST_DIR
-        )
+        self.client = chromadb.Client()
         self.collection = self.client.get_or_create_collection(
             name=collection_name,
             metadata={"hnsw:space": "cosine"}
