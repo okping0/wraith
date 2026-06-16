@@ -1,10 +1,8 @@
-import chromadb
-from chromadb.config import Settings
-import os
+import os, dotenv
+from qdrant_client import QdrantClient
+from qdrant_client.models import VectorParams, Distance, PointStruct
 
-COLLECTION_NAME = "wraith_chunks"
-
-# improvement - here the space is just one and evrything gets stored there. seperate it for different codebases
+dotenv.load_dotenv()
 
 class VectorStore:
 
@@ -18,63 +16,61 @@ class VectorStore:
 
     def __init__(self, codebase_path: str):
 
-        if hasattr(self, 'collection'):
+        if hasattr(self, 'client'):
             return
-        collection_name = os.path.basename(codebase_path)
-        self.client = chromadb.Client()
-        self.collection = self.client.get_or_create_collection(
-            name=collection_name,
-            metadata={"hnsw:space": "cosine"}
+        self.collection_name = os.path.basename(os.path.abspath(codebase_path))
+        self.client = QdrantClient(
+            url = os.getenv("QDRANT_URL"),
+            api_key=os.getenv("QDRANT_API_KEY")
         )
-        print(f"Vector store ready. Collection: {collection_name}")
+        if not self.client.collection_exists(self.collection_name):
+            self.client.create_collection(
+                collection_name=self.collection_name,
+                vectors_config=VectorParams(size=1536, distance=Distance.COSINE)
+            )
+        print(f"Vector store ready. Collection: {self.collection_name}")
 
     def add_chunks(self, embedded_chunks: list[dict]) -> None:
         print(f"\nStoring {len(embedded_chunks)} chunks in vector store...")
 
-        ids = []
-        embeddings = []
-        documents = []
-        metadatas = []
+
+        points = []
 
         for i, chunk in enumerate(embedded_chunks):
-            ids.append(f"chunk_{i}")
-            embeddings.append(chunk["embedding"])
-            documents.append(chunk["text"])
-            metadatas.append(chunk["metadata"])
-
-        self.collection.upsert(
-            ids=ids,
-            embeddings=embeddings,
-            documents=documents,
-            metadatas=metadatas
-        )
+            points.append(PointStruct(
+                id=i,
+                vector=chunk["embedding"],
+                payload={"text": chunk["text"], "metadata": chunk["metadata"]}
+            ))
+        for i in range(0, len(points), 50):
+            batch = points[i:i+50]
+            self.client.upsert(
+                collection_name=self.collection_name,
+                points=batch
+            )
         print(f"Successfully stored {len(embedded_chunks)} chunks")
 
     def search(self, query_embedding: list[float], n_results: int = 5) -> list[dict]:
-        results = self.collection.query(
-            query_embeddings=[query_embedding],
-            n_results=n_results,
-            include=["documents", "metadatas", "distances"]
-        )
+        results = self.client.query_points(collection_name=self.collection_name,query=query_embedding,limit=n_results)
 
         matches = []
-        for i in range(len(results["ids"][0])):
+        for result in results.points:
             matches.append({
-                "text": results["documents"][0][i],
-                "metadata": results["metadatas"][0][i],
-                "score": 1 - results["distances"][0][i]
+                "text": result.payload["text"],
+                "metadata": result.payload["metadata"],
+                "score": result.score
             })
 
         return matches
 
     def get_collection_count(self) -> int:
-        return self.collection.count()
+        return self.client.count(self.collection_name).count
 
     def clear(self) -> None:
-        self.client.delete_collection(COLLECTION_NAME)
-        self.collection = self.client.get_or_create_collection(
-            name=COLLECTION_NAME,
-            metadata={"hnsw:space": "cosine"}
+        self.client.delete_collection(self.collection_name)
+        self.client.create_collection(
+            collection_name=self.collection_name,
+            vectors_config=VectorParams(size=1536,distance=Distance.COSINE)
         )
         print("Vector store cleared")
 
@@ -103,7 +99,7 @@ if __name__ == "__main__":
     embedded_chunks = embedder.embed_chunks(chunks)
 
     print("\nStep 4: Storing in vector database...")
-    store = VectorStore()
+    store = VectorStore(path)
     store.add_chunks(embedded_chunks)
     print(f"Total chunks in DB: {store.get_collection_count()}")
 
