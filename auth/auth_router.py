@@ -90,4 +90,4 @@ def github_callback(code: str, db:Session= Depends(get_db)):
         db.refresh(user)
 
     token = create_token({"sub": str(user.id), "username": user.username})
-    return {"access_token": token}
+    return RedirectResponse(f"/?token={token}")

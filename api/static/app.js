@@ -426,6 +426,11 @@ function authLogout() {
 }
 
 function checkAuth() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("token")) {
+    localStorage.setItem("token", params.get("token"));
+    window.history.replaceState({}, "", "/");
+  }
   const token = localStorage.getItem("token");
   document.getElementById("authLoggedOutBtn").style.display = token ? "none" : "block";
   document.getElementById("authLoggedInBtn").style.display = token ? "flex" : "none";
