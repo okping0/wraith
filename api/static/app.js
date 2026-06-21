@@ -369,3 +369,66 @@ async function runResearch() {
     setBtn("btnResearch", false);
   }
 }
+
+// ─── AUTH ──────────────────────────────────────────────────────
+function openAuthModal() {
+  document.getElementById("authModal").style.display = "flex";
+}
+function closeAuthModal() {
+  document.getElementById("authModal").style.display = "none";
+}
+
+function authHeaders() {
+  const token = localStorage.getItem("token");
+  return token ? { "Authorization": "Bearer " + token } : {};
+}
+
+async function authLogin() {
+  const email = document.getElementById("authEmail").value;
+  const password = document.getElementById("authPassword").value;
+  const res = await fetch("/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password })
+  });
+  const data = await res.json();
+  if (res.ok) {
+    localStorage.setItem("token", data.access_token);
+    closeAuthModal();
+    checkAuth();
+  } else {
+    document.getElementById("authError").textContent = data.detail || "Login failed";
+  }
+}
+
+async function authRegister() {
+  const email = document.getElementById("authEmail").value;
+  const password = document.getElementById("authPassword").value;
+  const username = email.split("@")[0];
+  const res = await fetch("/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password, username })
+  });
+  const data = await res.json();
+  if (res.ok) {
+    localStorage.setItem("token", data.access_token);
+    closeAuthModal();
+    checkAuth();
+  } else {
+    document.getElementById("authError").textContent = data.detail || "Register failed";
+  }
+}
+
+function authLogout() {
+  localStorage.removeItem("token");
+  checkAuth();
+}
+
+function checkAuth() {
+  const token = localStorage.getItem("token");
+  document.getElementById("authLoggedOutBtn").style.display = token ? "none" : "block";
+  document.getElementById("authLoggedInBtn").style.display = token ? "flex" : "none";
+}
+
+checkAuth();
