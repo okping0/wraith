@@ -5,4 +5,10 @@ pydantic==2.13.4
 python-dotenv==1.2.2
 Requests==2.34.2
 chromadb==1.5.5
-uvicorn
+uvicorn==0.42.0
+qdrant-client==1.18.0
+httpx==0.28.1
+SQLAlchemy==2.0.51
+psycopg2-binary==2.9.12
+passlib==1.7.4
+python-jose==3.5.0
