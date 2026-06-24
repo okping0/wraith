@@ -371,11 +371,35 @@ async function runResearch() {
 }
 
 // ─── AUTH ──────────────────────────────────────────────────────
-function openAuthModal() {
+let authMode = "login"; // "login" or "signup"
+
+function openAuthModal(mode) {
+  authMode = mode || "login";
+  updateAuthModalView();
   document.getElementById("authModal").style.display = "flex";
 }
+
 function closeAuthModal() {
   document.getElementById("authModal").style.display = "none";
+  document.getElementById("authError").textContent = "";
+}
+
+function toggleAuthMode() {
+  authMode = authMode === "login" ? "signup" : "login";
+  updateAuthModalView();
+}
+
+function updateAuthModalView() {
+  const isSignup = authMode === "signup";
+  document.getElementById("authModalTitle").textContent = isSignup ? "Sign Up" : "Login";
+  document.getElementById("authUsernameField").style.display = isSignup ? "block" : "none";
+  document.getElementById("authSubmitBtn").textContent = isSignup ? "SIGN UP" : "LOGIN";
+  document.getElementById("authSubmitBtn").onclick = isSignup ? authRegister : authLogin;
+   document.getElementById("authGithubBtn").textContent = isSignup ? "REGISTER WITH GITHUB" : "LOGIN WITH GITHUB";
+  document.getElementById("authToggleLink").textContent = isSignup
+    ? "Already have an account? Log in"
+    : "Don't have an account? Sign up";
+  document.getElementById("authError").textContent = "";
 }
 
 function authHeaders() {
@@ -394,6 +418,7 @@ async function authLogin() {
   const data = await res.json();
   if (res.ok) {
     localStorage.setItem("token", data.access_token);
+    localStorage.setItem("username", data.username || email.split("@")[0]);
     closeAuthModal();
     checkAuth();
   } else {
@@ -402,9 +427,15 @@ async function authLogin() {
 }
 
 async function authRegister() {
+  const username = document.getElementById("authUsernameField").value.trim();
   const email = document.getElementById("authEmail").value;
   const password = document.getElementById("authPassword").value;
-  const username = email.split("@")[0];
+
+  if (!username) {
+    document.getElementById("authError").textContent = "Username is required";
+    return;
+  }
+
   const res = await fetch("/auth/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -413,6 +444,7 @@ async function authRegister() {
   const data = await res.json();
   if (res.ok) {
     localStorage.setItem("token", data.access_token);
+    localStorage.setItem("username", username);
     closeAuthModal();
     checkAuth();
   } else {
@@ -422,6 +454,7 @@ async function authRegister() {
 
 function authLogout() {
   localStorage.removeItem("token");
+  localStorage.removeItem("username");
   checkAuth();
 }
 
@@ -432,8 +465,12 @@ function checkAuth() {
     window.history.replaceState({}, "", "/");
   }
   const token = localStorage.getItem("token");
-  document.getElementById("authLoggedOutBtn").style.display = token ? "none" : "block";
+  const username = localStorage.getItem("username");
+  document.getElementById("authLoggedOutBtn").style.display = token ? "none" : "flex";
   document.getElementById("authLoggedInBtn").style.display = token ? "flex" : "none";
+  if (token && username) {
+    document.getElementById("authUsername").textContent = "Hello, " + username;
+  }
 }
 
 checkAuth();

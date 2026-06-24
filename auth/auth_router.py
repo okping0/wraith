@@ -41,7 +41,7 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
 @router.post("/login", response_model=TokenResponse)
 def login(request: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == request.email).first()
-    if not user or not pwd_context.verify(request.password, user.password_hash):
+    if not user or not user.password_hash or not pwd_context.verify(request.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     token = create_token({"sub": str(user.id), "username": user.username})
