@@ -8,7 +8,7 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("POSTGRES_CONNECTION_STRING")
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, pool_pre_ping=True, pool_recycle=300)
 SessionLocal = sessionmaker(bind=engine, autoflush=False,expire_on_commit=False)
 Base = declarative_base()
 

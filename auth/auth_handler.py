@@ -2,6 +2,7 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
+import secrets
 
 load_dotenv()
 
@@ -21,3 +22,7 @@ def verify_token(token: str) -> dict | None:
         return payload
     except JWTError:
         return None
+    
+def generate_otp():
+    otp = "".join(secrets.choice("0123456789") for i in range(6))
+    return f"Your Email verification OTP: {otp}"
