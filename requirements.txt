@@ -29,7 +29,6 @@ SQLAlchemy==2.0.51
 starlette==1.0.0
 tqdm==4.67.3
 uvicorn==0.42.0
-voyageai==0.3.7
 webencodings==0.5.1
 websocket-client==1.9.0
 websockets==16.0
