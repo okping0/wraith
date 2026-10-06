@@ -18,6 +18,7 @@ load_dotenv()
 
 GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")
 GITHUB_CLIENT_SECRET=os.getenv("GITHUB_CLIENT_SECRET")
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
 @router.post("/register", response_model=TokenResponse)
 def register(request: RegisterRequest, db: Session = Depends(get_db)):
@@ -50,7 +51,11 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 
 @router.get("/github/login")
 def github_login():
-    return RedirectResponse(f"https://github.com/login/oauth/authorize?client_id={GITHUB_CLIENT_ID}&redirect_uri=https://wraith-6efg.onrender.com/auth/github/callback")
+    return RedirectResponse(
+        f"https://github.com/login/oauth/authorize"
+        f"?client_id={GITHUB_CLIENT_ID}"
+        f"&redirect_uri={BACKEND_URL}/auth/github/callback"
+        )
 
 
 @router.get("/github/callback")
