@@ -11,7 +11,12 @@ export async function api(path, body) {
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.detail || "Server error");
+  if (!res.ok) {
+    const d = data.detail;
+    const msg = Array.isArray(d) ? d.map((x) => x.msg).join(", ") : d;
+    throw new Error(msg || "Something went wrong");
+  }
+
   return data;
 }
 

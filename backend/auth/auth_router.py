@@ -1,6 +1,8 @@
 import os
 from dotenv import load_dotenv
 import httpx
+import re
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
@@ -22,8 +24,32 @@ GITHUB_CLIENT_SECRET=os.getenv("GITHUB_CLIENT_SECRET")
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
+
+def validate_password(pw: str) -> Optional[str]:
+    if len(pw) < 8:
+        return "Password must be at least 8 characters"
+    if len(pw.encode()) > 72:
+        return "Password is too long (max 72 characters)"
+    if not re.search(r"[a-z]", pw):
+        return "Password needs a lowercase letter"
+    if not re.search(r"[A-Z]", pw):
+        return "Password needs an uppercase letter"
+    if not re.search(r"\d", pw):
+        return "Password needs a number"
+    if not re.search(r"[^A-Za-z0-9]", pw):
+        return "Password needs a special character"
+    return None
+
+
 @router.post("/register", response_model=TokenResponse)
 def register(request: RegisterRequest, db: Session = Depends(get_db)):
+    
+    if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", request.email):
+        raise HTTPException(status_code=400, detail="Enter a valid email address")
+    err = validate_password(request.password)
+    if err:
+        raise HTTPException(status_code=400, detail=err)
+    
     if db.query(User).filter(User.email == request.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
     if db.query(User).filter(User.username == request.username).first():
@@ -44,8 +70,13 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
 @router.post("/login", response_model=TokenResponse)
 def login(request: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == request.email).first()
-    if not user or not user.password_hash or not pwd_context.verify(request.password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+    if user and not user.password_hash:
+        raise HTTPException(
+            status_code=400,
+            detail="This account uses GitHub. Click 'Continue with GitHub'.",
+        )
+    if not user or not pwd_context.verify(request.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Incorrect email or password")
     
     token = create_token({"sub": str(user.id), "username": user.username})
     return TokenResponse(access_token=token)
@@ -57,6 +88,8 @@ def github_login():
         f"https://github.com/login/oauth/authorize"
         f"?client_id={GITHUB_CLIENT_ID}"
         f"&redirect_uri={BACKEND_URL}/auth/github/callback"
+        "&scope=read:user%20user:email"
+        "&prompt=select_account"
         )
 
 
@@ -83,6 +116,17 @@ def github_callback(code: str, db:Session= Depends(get_db)):
     github_id = str(github_user["id"])
     username = github_user.get("login")
     email = github_user.get("email")
+
+    if not email:
+        emails = httpx.get(
+            "https://api.github.com/user/emails",
+            headers={"Authorization": f"Bearer {access_token}"},
+        ).json()
+        if isinstance(emails, list):
+            email = next(
+                (e["email"] for e in emails if e.get("primary") and e.get("verified")),
+                None,
+            )
 
     user = db.query(User).filter(User.github_id == github_id).first()
     if not user:

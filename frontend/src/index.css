@@ -285,3 +285,17 @@ input:focus, textarea:focus { border-color: var(--violet); box-shadow: 0 0 0 3px
   .hero-art { order: -1; min-height: 220px; }
   .land-nav, .land-section, .land-footer { padding-left: 24px; padding-right: 24px; }
 }
+
+.pw-wrap { position: relative; }
+.pw-wrap input { padding-right: 40px; }
+.pw-toggle {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  color: var(--muted); display: grid; place-items: center; padding: 4px;
+}
+.pw-toggle:hover { color: var(--text); }
+.pw-rules {
+  list-style: none; display: grid; grid-template-columns: 1fr 1fr;
+  gap: 4px 10px; font-size: 12px; color: var(--muted);
+}
+.pw-rules li { display: flex; align-items: center; gap: 6px; }
+.pw-rules li.ok { color: var(--ok); }
