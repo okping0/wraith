@@ -6,10 +6,7 @@ import subprocess
 import stat
 from dotenv import load_dotenv
 
-sys.path.append("..")
 from fastapi import FastAPI, HTTPException, Depends
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
 from pydantic import BaseModel
@@ -42,6 +39,8 @@ models.Base.metadata.create_all(bind=db_engine)
 
 
 from auth.dependencies import get_current_user
+
+origins = os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",")
 
 app.add_middleware(
     CORSMiddleware,
@@ -99,12 +98,10 @@ def remove_readonly(func, path, exc_info):
 from auth.auth_router import router as auth_router
 app.include_router(auth_router)
 
-app.mount("/static", StaticFiles(directory="api/static"), name="static")
-
 
 @app.get("/")
 def root():
-    return FileResponse("api/static/index.html")
+    return {"name": "Wraith API", "status": "ok"}
 
 
 @app.get("/health")

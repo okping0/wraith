@@ -1,0 +1,15 @@
+export default function Ghost({ size = 120 }) {
+  return (
+    <svg className="ghost-float" width={size} height={size} viewBox="0 0 60 60">
+      <path
+        d="M12 30 Q12 8 30 8 Q48 8 48 30 L48 52 Q42 46 36 52 Q30 46 24 52 Q18 46 12 52 Z"
+        fill="#b9a7ff"
+        opacity="0.9"
+      />
+      <circle cx="23" cy="29" r="3.5" fill="#1a1726" />
+      <circle cx="37" cy="29" r="3.5" fill="#1a1726" />
+      <ellipse cx="19" cy="36" rx="3" ry="1.8" fill="#f9a8d4" opacity="0.5" />
+      <ellipse cx="41" cy="36" rx="3" ry="1.8" fill="#f9a8d4" opacity="0.5" />
+    </svg>
+  );
+}
