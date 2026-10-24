@@ -105,12 +105,12 @@ def root():
     return RedirectResponse(os.getenv("FRONTEND_URL", "http://localhost:5173"))
 
 
-@app.get("/health")
+@app.get("/health", methods=["GET", "HEAD"])
 def health():
     return {"name": "Wraith API", "status": "ok"}
 
 
-@app.post("/ingest")
+@app.post("/ingest", )
 def ingest(request: IngestRequest, current_user:Optional[User]=Depends(get_current_user)):
     try:
         from ingestion.file_parser import get_all_files, read_file
