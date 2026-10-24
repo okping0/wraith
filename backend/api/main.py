@@ -105,7 +105,7 @@ def root():
     return RedirectResponse(os.getenv("FRONTEND_URL", "http://localhost:5173"))
 
 
-@app.get("/health", methods=["GET", "HEAD"])
+@app.api_route("/health", methods=["GET", "HEAD"])
 def health():
     return {"name": "Wraith API", "status": "ok"}
 
