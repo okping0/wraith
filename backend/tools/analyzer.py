@@ -8,12 +8,12 @@ from ingestion.file_parser import get_all_files
 
 load_dotenv()
 
-MODEL = "llama-3.1-8b-instant"
+MODEL = os.getenv("LLM_MODEL")
 
 
 class CodeAnalyzer:
     def __init__(self, codebase_path: str):
-        self.client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        self.client = Groq(api_key=os.getenv("LLM_API_KEY"))
         self.codebase_path = codebase_path
 
     def _analyze_chunk(self, code: str, file_path: str) -> str:

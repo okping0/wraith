@@ -8,7 +8,7 @@ from ingestion.file_parser import get_all_files, read_file
 
 load_dotenv()
 
-MODEL = "llama-3.1-8b-instant"
+MODEL = os.getenv("LLM_MODEL")
 
 class StackDetector:
   def __init__(self, codebase_path: str):
@@ -88,7 +88,7 @@ class StackDetector:
 
 class WebResearcher:
     def __init__(self, codebase_path: str):
-        self.client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        self.client = Groq(api_key=os.getenv("LLM_API_KEY"))
         self.codebase_path = codebase_path
         self.stack_detector = StackDetector(codebase_path)
         self.stack = self.stack_detector.detect()

@@ -59,7 +59,7 @@ pip install -r requirements.txt
 
 # 3. Set up environment variables
 cp .env.example .env
-# Add your GROQ_API_KEY and JINA_API_KEY
+# Add your LLM_API_KEY and JINA_API_KEY
 
 # 4. Run the server
 uvicorn api.main:app --reload

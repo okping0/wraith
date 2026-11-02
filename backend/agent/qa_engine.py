@@ -8,13 +8,13 @@ from ingestion.embedder import CodeEmbedder
 
 load_dotenv()
 
-MODEL = "llama-3.1-8b-instant"
+MODEL = os.getenv("LLM_MODEL")
 MAX_CONTEXT_CHUNKS = 5
 RELEVANCE_THRESHOLD = 0.4
 
 class QAEngine:
   def __init__(self):
-    self.client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+    self.client = Groq(api_key=os.getenv("LLM_API_KEY"))
     self.embedder = CodeEmbedder()
     print("Wraith QA Engine ready")
 

@@ -8,12 +8,12 @@ from tools.code_tools import search_codebase, read_file
 
 load_dotenv()
 
-MODEL = "llama-3.1-8b-instant"
+MODEL = os.getenv("LLM_MODEL")
 
 
 class GitHubIssueSolver:
     def __init__(self, codebase_path: str):
-        self.client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        self.client = Groq(api_key=os.getenv("LLM_API_KEY"))
         self.codebase_path = codebase_path
         self.github_token = os.getenv("GITHUB_TOKEN")
 
@@ -208,7 +208,7 @@ Only reference code that appears EXACTLY in the context above.
 If you cannot find the specific line, say "I could not locate the exact line 
 in the provided context." Never invent code."""
 
-        client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        client = Groq(api_key=os.getenv("LLM_API_KEY"))
         response = client.chat.completions.create(
             model=MODEL,
             messages=[{"role": "user", "content": prompt}],

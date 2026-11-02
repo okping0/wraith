@@ -8,13 +8,13 @@ from tools.code_tools import TOOLS
 
 load_dotenv()
 
-MODEL = "llama-3.1-8b-instant"
+MODEL = os.getenv("LLM_MODEL")
 MAX_ITERATIONS = 3
 
 
 class WraithAgent:
     def __init__(self, codebase_path: str):
-        self.client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        self.client = Groq(api_key=os.getenv("LLM_API_KEY"))
         self.codebase_path = codebase_path
         self.conversation = []
         print("Wraith Agent ready")
